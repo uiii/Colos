@@ -1,0 +1,39 @@
+<project name="Colos" basedir="." default="main">
+
+	<!-- PROPERTIES -->
+	<property name="src.dir" value="src"/>
+
+	<property name="build.dir" value="build"/>
+	<property name="bin.dir" value="bin"/>
+
+	<property name="main-class" value="${ant.project.name}.Main"/>
+
+	<!-- TARGETS -->
+	<target name="main" depends="clean, run"/>
+
+	<target name="compile">
+		<mkdir dir="${build.dir}"/>
+		<javac srcdir="${src.dir}" destdir="${build.dir}" includeantruntime="false" />
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="${bin.dir}"/>
+		<jar destfile="${bin.dir}/${ant.project.name}.jar" basedir="${build.dir}">
+			<manifest>
+				<attribute name="Main-Class" value="${main-class}"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="run" depends="jar">
+		<java jar="${bin.dir}/${ant.project.name}.jar" fork="true"/>
+	</target>
+
+	<target name="clean-build" depends="clean, jar"/>
+
+	<target name="clean">
+		<delete dir="${bin.dir}"/>
+		<delete dir="${build.dir}"/>
+	</target>
+
+</project>
