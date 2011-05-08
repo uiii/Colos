@@ -37,7 +37,7 @@ public abstract class Filler implements Paint {
             RenderingHints hints) {
 
         Point devicePoint = deviceBounds.getLocation();
-        devicePoint.move(1, 1);
+        devicePoint.translate(1, 1);
 
         Point userPoint = userBounds.getBounds().getLocation();
 
@@ -53,17 +53,6 @@ public abstract class Filler implements Paint {
             }
 
             public Raster getRaster(int x, int y, int w, int h) {
-                /*System.out.print(x);
-                System.out.print(" ");
-                System.out.print(y);
-                System.out.print(" ");
-                System.out.print(w);
-                System.out.print(" ");
-                System.out.println(h);
-
-                System.out.print(x_offset_);
-                System.out.print(" ");
-                System.out.println(y_offset_);*/
                 WritableRaster raster = getColorModel().createCompatibleWritableRaster(w, h);
 
                 int[] data = new int[w * h * 4];

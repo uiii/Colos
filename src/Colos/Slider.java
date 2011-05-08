@@ -1,11 +1,16 @@
 package Colos;
 
-public class Slider {
+import javax.swing.JPanel;
+import java.awt.Shape;
+
+public abstract class Slider extends JPanel {
 
     public Filler filler_;
 
     public Slider() {
         filler_ = null;
+
+        setOpaque(false); // transparent bacground
     }
 
     public Filler filler() {
@@ -14,6 +19,9 @@ public class Slider {
 
     public void setFiller(Filler filler) {
         filler_ = filler;
+
+        filler.setShape(shape());
     }
 
+    public abstract Shape shape();
 }
