@@ -10,7 +10,7 @@ public abstract class Slider extends JPanel {
     public Slider() {
         filler_ = null;
 
-        setOpaque(false); // transparent bacground
+        //setOpaque(false); // transparent bacground
     }
 
     public Filler filler() {

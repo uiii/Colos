@@ -26,11 +26,9 @@ import java.awt.geom.Line2D;
 import java.awt.Dimension;
 import java.awt.Font;
 
-public class RGBColorSelector extends ColorSelector {
+public class HSVColorSelector extends ColorSelector {
 
-    protected LineSlider<Integer> redSlider_;
-    protected LineSlider<Integer> greenSlider_;
-    protected LineSlider<Integer> blueSlider_;
+    protected CircleSlider<Integer> hueSlider_;
 
     protected JSpinner redSpinner_;
     protected JSpinner greenSpinner_;
@@ -42,8 +40,8 @@ public class RGBColorSelector extends ColorSelector {
 
     protected boolean receiveChangeEvent_ = true;
 
-    public RGBColorSelector() {
-        super("RGB");
+    public HSVColorSelector() {
+        super("HSV");
 
         color_ = Color.black;
     }
@@ -51,38 +49,22 @@ public class RGBColorSelector extends ColorSelector {
     @Override
     protected void initUI_() {
 
-        redSlider_ = new LineSlider<Integer>(new IntegerModel(0, 255, 1));
-        redSlider_.setFiller(new LineFiller(Color.black, Color.red));
-
-        greenSlider_ = new LineSlider<Integer>(new IntegerModel(0, 255, 1));
-        greenSlider_.setFiller(new LineFiller(Color.black, Color.green));
-
-        blueSlider_ = new LineSlider<Integer>(new IntegerModel(0, 255, 1));
-        blueSlider_.setFiller(new LineFiller(Color.black, Color.blue));
+        hueSlider_ = new CircleSlider<Integer>(new IntegerModel(0, 255, 1));
+        //hueSlider_.setFiller(new LineFiller(Color.black, Color.red));
 
         JLayeredPane colorPanel = new JLayeredPane();
         colorPanel.setPreferredSize(new Dimension(175, 194));
 
-        colorPanel.add(redSlider_, 0);
-        colorPanel.add(greenSlider_, 0);
-        colorPanel.add(blueSlider_, 0);
+        colorPanel.add(hueSlider_, 0);
 
-        redSlider_.setLocation(10,103);
-        redSlider_.setBackground(Color.black);
-        redSlider_.setSize(-69,40);
-
-        greenSlider_.setLocation(94,103);
-        greenSlider_.setSize(69,40);
-        greenSlider_.setBackground(Color.yellow);
-
-        blueSlider_.setLocation(87, 10);
-        blueSlider_.setSize(0,-80);
-        blueSlider_.setBackground(Color.yellow);
+        hueSlider_.setLocation(10,103);
+        hueSlider_.setBackground(Color.black);
+        //hueSlider_.setSize(-69,40);
 
         ChangeListener sliderChangeListener = new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
-                    if(receiveChangeEvent_) {
+                    /*if(receiveChangeEvent_) {
                         color_ = new Color(
                             redSlider_.value(),
                             greenSlider_.value(),
@@ -90,13 +72,11 @@ public class RGBColorSelector extends ColorSelector {
                         );
 
                         colorChanged_();
-                    }
+                    }*/
                 }
         };
 
-        redSlider_.addChangeListener(sliderChangeListener);
-        greenSlider_.addChangeListener(sliderChangeListener);
-        blueSlider_.addChangeListener(sliderChangeListener);
+        hueSlider_.addChangeListener(sliderChangeListener);
 
         JLabel redLabel = new JLabel("Red: ");
         redLabel.setLabelFor(redSpinner_);
@@ -150,7 +130,7 @@ public class RGBColorSelector extends ColorSelector {
 
                             color_ = Color.decode(hex);
                         } catch(NumberFormatException ex) {
-                            System.err.printf("Invalid color hex '%s'\n",
+                            System.err.printf("Invalid color hex '%s'",
                                 hexField_.getText());
                         }
 
@@ -199,10 +179,6 @@ public class RGBColorSelector extends ColorSelector {
         redSpinner_.setValue(color_.getRed());
         greenSpinner_.setValue(color_.getGreen());
         blueSpinner_.setValue(color_.getBlue());
-
-        redSlider_.setValue(color_.getRed());
-        greenSlider_.setValue(color_.getGreen());
-        blueSlider_.setValue(color_.getBlue());
 
         hexField_.setText(Integer.toHexString(color_.getRGB()).substring(2, 8));
 

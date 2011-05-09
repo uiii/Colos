@@ -6,18 +6,51 @@ import javax.swing.JToggleButton;
 import javax.swing.BoxLayout;
 import java.awt.FlowLayout;
 
+import java.awt.Color;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import java.util.LinkedList;
+import java.util.ListIterator;
+
 public class Colos extends JFrame {
 
-    private JPanel buttonPanel_;
-    private JPanel selectorPanel_;
+    protected Color color_;
 
-    private JToggleButton defaultColorSelectorButton_ = null;
+    protected JPanel buttonPanel_;
+    protected JPanel selectorPanel_;
+
+    protected LinkedList<ColorSelector> selectors_ = new LinkedList<ColorSelector>();
+
+    protected JToggleButton defaultColorSelectorButton_ = null;
+
+    protected boolean receiveChangeEvent_ = true;
+
+    protected class SelectorChangeListener implements ChangeListener {
+            protected ColorSelector selector_;
+
+            public SelectorChangeListener(ColorSelector selector) {
+                selector_ = selector;
+            }
+
+            public void stateChanged(ChangeEvent e) {
+                if(receiveChangeEvent_) {
+                    color_ = selector_.color();
+
+                    colorChanged_();
+                }
+            }
+    }
 
     public Colos() {
         initUI_();
     }
 
     public void registerColorSelector(ColorSelector selector) {
+        selectors_.add(selector);
+
+        selector.addChangeListener(new SelectorChangeListener(selector));
+
         JToggleButton selectorButton = new JToggleButton(selector.name());
         buttonPanel_.add(selectorButton);
         selectorPanel_.add(selector);
@@ -48,5 +81,16 @@ public class Colos extends JFrame {
         //setSize(300, 200);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    }
+
+    private void colorChanged_() {
+        receiveChangeEvent_ = false;
+
+        ListIterator<ColorSelector> it = selectors_.listIterator();
+        while(it.hasNext()) {
+            it.next().setColor(color_);
+        }
+
+        receiveChangeEvent_ = true;
     }
 }

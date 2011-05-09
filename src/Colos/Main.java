@@ -9,6 +9,7 @@ public class Main {
                     public void run() {
                         Colos picker = new Colos();
                         picker.registerColorSelector(new RGBColorSelector());
+                        picker.registerColorSelector(new HSVColorSelector());
                         picker.setVisible(true);
                     }
                 }
