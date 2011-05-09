@@ -3,7 +3,7 @@ package Colos;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.BasicStroke;
 import java.awt.Shape;
@@ -31,6 +31,10 @@ public class CircleSlider<T> extends Slider {
     
     protected int width_;
     protected int height_;
+
+    protected double startAngle_ = 0;
+
+    protected Point2D center_;
 
     protected transient ChangeEvent changeEvent = null;
     protected EventListenerList listenerList = new EventListenerList();
@@ -103,6 +107,11 @@ public class CircleSlider<T> extends Slider {
             width_, height_
         );
 
+        center_ = new Point2D.Double(
+                halfThickness + width_ / 2.0,
+                halfThickness + height / 2.0
+        );
+
         super.setPreferredSize(
             new Dimension(
                 width_ + thickness_,
@@ -116,8 +125,8 @@ public class CircleSlider<T> extends Slider {
 
         super.setBounds(
             x, y,
-            width_ + thickness_,
-            height_ + thickness_
+            width_ + thickness_ + 1,
+            height_ + thickness_ + 1
         );
 
         if(pointer_ == null) {
@@ -128,6 +137,10 @@ public class CircleSlider<T> extends Slider {
     public void setThickness(int thickness) {
         thickness_ = thickness;
         setPreferredSize(new Dimension(width_, height_));
+    }
+
+    public void setStartAngle(double angle) {
+        startAngle_ = angle;
     }
 
     public void paintComponent(Graphics g) {
@@ -171,13 +184,20 @@ public class CircleSlider<T> extends Slider {
 
         public void updatePosition() {
             double ratio = model_.ratio();
-            double radius = (thickness_ / 2.0) - 2;
+            double angle = ratio * 2 * Math.PI + startAngle_;
+
+            double ellipseRadius = getRadius(angle);
+
+            double pointerX = center_.getX() + ellipseRadius * Math.cos(angle);
+            double pointerY = center_.getY() - ellipseRadius * Math.sin(angle);
+
+            double pointerRadius = (thickness_ / 2.0) - 2;
 
             setFrame (
-                ellipse_.getX() + 0.5 + (ratio * width_) - radius,
-                ellipse_.getY() + 0.5 + (ratio * height_) - radius,
-                2 * radius,
-                2 * radius
+                pointerX - pointerRadius,
+                pointerY - pointerRadius,
+                2 * pointerRadius,
+                2 * pointerRadius
             );
         }
 
@@ -190,12 +210,56 @@ public class CircleSlider<T> extends Slider {
         }
     }
 
+    protected double getRadius(double angle) {
+        double ellipseA = width_ / 2;
+        double ellipseB = height_ / 2;
+
+        double ellipseRadius = ellipseA * ellipseB
+                / Math.sqrt(
+                        Math.pow(ellipseB * Math.cos(angle), 2) 
+                        + Math.pow(ellipseA * Math.sin(angle), 2) 
+                  );
+
+        return ellipseRadius;
+    }
+
+    protected double pointToAngle(Point2D point) {
+        double centerDist = center_.distance(point);
+        double xAxisDist = 
+            new Line2D.Double(
+                center_,
+                new Point2D.Double(center_.getX() + 1, center_.getY())
+            ).ptLineDist(point);
+        
+        double rawAngle = Math.asin(xAxisDist / centerDist);
+
+        double angle = rawAngle;
+
+        if(point.getY() > center_.getY()) {
+            angle = -angle;
+        }
+
+        if(point.getX() < center_.getX()) {
+            angle = Math.PI - angle;
+        } else {
+            angle = (2 * Math.PI + angle) % (2 * Math.PI);
+        }
+
+        return angle;
+    }
+
     class MouseScaleAdapter extends MouseAdapter implements MouseWheelListener {
         public void mousePressed(MouseEvent e) {
-            /*if(ellipse_.ptSegDist(e.getX(), e.getY()) <= thickness_) {
+            Point2D point = new Point2D.Double(e.getX(), e.getY());
+            double dist = center_.distance(point);
+            double radius = getRadius(pointToAngle(point));
+            double halfThickness = thickness_ / 2.0;
+
+            if((radius - halfThickness - 2 <= dist)
+                    && (dist <= radius + halfThickness + 2)) {
                 adjust_(e);
                 pointer_.setGrabbed(true);
-            }*/
+            }
         }
 
         public void mouseReleased(MouseEvent e) {
@@ -210,52 +274,29 @@ public class CircleSlider<T> extends Slider {
 
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                /*if(ellipse_.ptSegDist(e.getX(), e.getY()) <= thickness_) {
+                Point2D point = new Point2D.Double(e.getX(), e.getY());
+                double dist = center_.distance(point);
+                double radius = getRadius(pointToAngle(point));
+                double halfThickness = thickness_ / 2.0;
+
+                if((radius - halfThickness - 2 <= dist)
+                        && (dist <= radius + halfThickness + 2)) {
                     double ratio = model_.ratio();
-                    ratio += e.getWheelRotation() * -0.05;
+                    ratio += e.getWheelRotation() * -0.02;
+                    if(ratio > 1) ratio -= 1;
+                    else if(ratio < 0) ratio += 1;
                     model_.adjustValue(ratio);
                     repaint();
-                }*/
+                }
             }
         }
 
         private void adjust_(MouseEvent e) {
-            /*Point2D point = new Point2D.Double(e.getX(), e.getY());
-            Point2D start = ellipse_.getP1();
-            Point2D end = ellipse_.getP2();
-
-            Point2D normalVector = new Point2D.Double(
-                    start.getY() - end.getY(),
-                    end.getX() - start.getX()
-            );
-
-            Point2D middlePoint = new Point2D.Double(
-                    (start.getX() + end.getX()) / 2.0,
-                    (start.getY() + end.getY()) / 2.0
-            );
-
-            Ellipse2D lineAxis = new Ellipse2D.Double(middlePoint, new Point2D.Double(
-                        middlePoint.getX() + normalVector.getX(),
-                        middlePoint.getY() + normalVector.getY()
-            ));
-
-            double halfLength = start.distance(end) / 2.0;
-
-            double middleDist = lineAxis.ptLineDist(point);
-            double startDist = start.distance(point);
-            double endDist = end.distance(point);
-
-            double ratio;
-            if(startDist < endDist) {
-                ratio = 1.0/2.0 * (1.0 - middleDist / halfLength);
-                if(ratio < 0) ratio = 0;
-            } else {
-                ratio = 1.0/2.0 * (1 + middleDist / halfLength);
-                if(ratio > 1) ratio = 1;
-            }
+            double ratio =
+                pointToAngle(new Point2D.Double(e.getX(), e.getY())) / (2 * Math.PI);
 
             model_.adjustValue(ratio);
-            repaint();*/
+            repaint();
         }
     }
 

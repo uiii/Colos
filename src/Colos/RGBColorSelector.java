@@ -61,7 +61,7 @@ public class RGBColorSelector extends ColorSelector {
         blueSlider_.setFiller(new LineFiller(Color.black, Color.blue));
 
         JLayeredPane colorPanel = new JLayeredPane();
-        colorPanel.setPreferredSize(new Dimension(175, 194));
+        colorPanel.setPreferredSize(new Dimension(200, 200));
 
         colorPanel.add(redSlider_, 0);
         colorPanel.add(greenSlider_, 0);

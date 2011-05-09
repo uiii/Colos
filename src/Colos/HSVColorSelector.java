@@ -19,6 +19,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
 import java.awt.Color;
+import java.awt.color.ColorSpace;
 import java.awt.Shape;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
@@ -30,15 +31,17 @@ public class HSVColorSelector extends ColorSelector {
 
     protected CircleSlider<Integer> hueSlider_;
 
-    protected JSpinner redSpinner_;
-    protected JSpinner greenSpinner_;
-    protected JSpinner blueSpinner_;
+    protected JSpinner hueSpinner_;
+    protected JSpinner saturationSpinner_;
+    protected JSpinner valueSpinner_;
 
     protected JTextField hexField_;
 
     protected JPanel colorIndicator_;
 
     protected boolean receiveChangeEvent_ = true;
+
+    protected ColorSpace colorSpace_ = ColorSpace.getInstance(ColorSpace.TYPE_HSV); // TODO
 
     public HSVColorSelector() {
         super("HSV");
@@ -49,58 +52,59 @@ public class HSVColorSelector extends ColorSelector {
     @Override
     protected void initUI_() {
 
-        hueSlider_ = new CircleSlider<Integer>(new IntegerModel(0, 255, 1));
-        //hueSlider_.setFiller(new LineFiller(Color.black, Color.red));
+        hueSlider_ = new CircleSlider<Integer>(new IntegerModel(0, 359, 1));
+        //hueSlider_.setFiller(new LineFiller(Color.black, Color.hue));
 
         JLayeredPane colorPanel = new JLayeredPane();
-        colorPanel.setPreferredSize(new Dimension(175, 194));
+        colorPanel.setPreferredSize(new Dimension(200, 200));
 
         colorPanel.add(hueSlider_, 0);
 
-        hueSlider_.setLocation(10,103);
+        hueSlider_.setLocation(7,7);
+        hueSlider_.setThickness(10);
+        hueSlider_.setSize(186,186);
         hueSlider_.setBackground(Color.black);
-        //hueSlider_.setSize(-69,40);
 
         ChangeListener sliderChangeListener = new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
-                    /*if(receiveChangeEvent_) {
-                        color_ = new Color(
-                            redSlider_.value(),
-                            greenSlider_.value(),
-                            blueSlider_.value()
-                        );
+                    if(receiveChangeEvent_) {
+                        float[] components = color_.getColorComponents(colorSpace_, null);
+                        components[0] = hueSlider_.value() / 359f;
+                        color_ = new Color(colorSpace_, components, 1);
 
                         colorChanged_();
-                    }*/
+                    }
                 }
         };
 
         hueSlider_.addChangeListener(sliderChangeListener);
 
-        JLabel redLabel = new JLabel("Red: ");
-        redLabel.setLabelFor(redSpinner_);
-        JLabel greenLabel = new JLabel("Green: ");
-        greenLabel.setLabelFor(greenSpinner_);
-        JLabel blueLabel = new JLabel("Blue: ");
-        blueLabel.setLabelFor(blueSpinner_);
+        JLabel hueLabel = new JLabel("Hue: ");
+        hueLabel.setLabelFor(hueSpinner_);
+        JLabel saturationLabel = new JLabel("Saturation: ");
+        saturationLabel.setLabelFor(saturationSpinner_);
+        JLabel valueLabel = new JLabel("Value: ");
+        valueLabel.setLabelFor(valueSpinner_);
 
-        SpinnerNumberModel redModel = new SpinnerNumberModel(0, 0, 255, 1);
-        SpinnerNumberModel greenModel = new SpinnerNumberModel(0, 0, 255, 1);
-        SpinnerNumberModel blueModel = new SpinnerNumberModel(0, 0, 255, 1);
+        SpinnerNumberModel hueModel = new SpinnerNumberModel(0, 0, 359, 1);
+        SpinnerNumberModel saturationModel = new SpinnerNumberModel(0.0, 0.0, 1.0, 0.1);
+        SpinnerNumberModel valueModel = new SpinnerNumberModel(0.0, 0.0, 1.0, 0.1);
 
-        redSpinner_ = new JSpinner(redModel);
-        greenSpinner_ = new JSpinner(blueModel);
-        blueSpinner_ = new JSpinner(greenModel);
+        hueSpinner_ = new JSpinner(hueModel);
+        saturationSpinner_ = new JSpinner(valueModel);
+        valueSpinner_ = new JSpinner(saturationModel);
 
         ChangeListener spinnerChangeListener = new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if(receiveChangeEvent_) {
-                        color_ = new Color(
-                            (Integer) redSpinner_.getValue(),
-                            (Integer) greenSpinner_.getValue(),
-                            (Integer) blueSpinner_.getValue()
+                        color_ = new Color(colorSpace_,
+                            new float[] {
+                                (Integer) hueSpinner_.getValue() / 359f,
+                                (Float) saturationSpinner_.getValue(),
+                                (Float) valueSpinner_.getValue()
+                            }, 1
                         );
 
                         colorChanged_();
@@ -108,9 +112,9 @@ public class HSVColorSelector extends ColorSelector {
                 }
         };
 
-        redSpinner_.addChangeListener(spinnerChangeListener);
-        greenSpinner_.addChangeListener(spinnerChangeListener);
-        blueSpinner_.addChangeListener(spinnerChangeListener);
+        hueSpinner_.addChangeListener(spinnerChangeListener);
+        saturationSpinner_.addChangeListener(spinnerChangeListener);
+        valueSpinner_.addChangeListener(spinnerChangeListener);
         
         JLabel hexLabel = new JLabel("Hex: #");
         hexLabel.setLabelFor(hexField_);
@@ -139,16 +143,16 @@ public class HSVColorSelector extends ColorSelector {
                 }
         );
 
-        JPanel rgbPanel = new JPanel();
-        rgbPanel.setLayout(new GridLayout(3, 2, 0, 5));
+        JPanel hsvPanel = new JPanel();
+        hsvPanel.setLayout(new GridLayout(3, 2, 0, 5));
         //rgbPanel.setBorder(new EmptyBorder(0, 0, 15, 0));
 
-        rgbPanel.add(redLabel);
-        rgbPanel.add(redSpinner_);
-        rgbPanel.add(greenLabel);
-        rgbPanel.add(greenSpinner_);
-        rgbPanel.add(blueLabel);
-        rgbPanel.add(blueSpinner_);
+        hsvPanel.add(hueLabel);
+        hsvPanel.add(hueSpinner_);
+        hsvPanel.add(saturationLabel);
+        hsvPanel.add(saturationSpinner_);
+        hsvPanel.add(valueLabel);
+        hsvPanel.add(valueSpinner_);
         
         JPanel hexPanel = new JPanel();
         hexPanel.setLayout(new BoxLayout(hexPanel, BoxLayout.X_AXIS));
@@ -161,7 +165,7 @@ public class HSVColorSelector extends ColorSelector {
 
         JPanel valuePanel = new JPanel();
         valuePanel.setLayout(new BoxLayout(valuePanel, BoxLayout.Y_AXIS));
-        valuePanel.add(rgbPanel);
+        valuePanel.add(hsvPanel);
         valuePanel.add(javax.swing.Box.createVerticalStrut(15));
         valuePanel.add(hexPanel);
         valuePanel.add(javax.swing.Box.createVerticalStrut(15));
@@ -176,9 +180,11 @@ public class HSVColorSelector extends ColorSelector {
     protected void colorChanged_() {
         receiveChangeEvent_ = false;
 
-        redSpinner_.setValue(color_.getRed());
-        greenSpinner_.setValue(color_.getGreen());
-        blueSpinner_.setValue(color_.getBlue());
+        float[] components = color_.getColorComponents(colorSpace_, null);
+
+        hueSpinner_.setValue(components[0] * 359);
+        saturationSpinner_.setValue(components[1]);
+        valueSpinner_.setValue(components[2]);
 
         hexField_.setText(Integer.toHexString(color_.getRGB()).substring(2, 8));
 
