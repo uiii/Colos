@@ -1,7 +1,6 @@
 package Colos;
 
 import java.awt.Shape;
-import java.awt.Color;
 import java.awt.Paint;
 import java.awt.PaintContext;
 import java.awt.image.ColorModel;

@@ -18,8 +18,6 @@ import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import java.awt.Color;
-import java.awt.color.ColorSpace;
 import java.awt.Shape;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
@@ -41,12 +39,12 @@ public class HSVColorSelector extends ColorSelector {
 
     protected boolean receiveChangeEvent_ = true;
 
-    protected ColorSpace colorSpace_ = ColorSpace.getInstance(ColorSpace.TYPE_HSV); // TODO
+    //protected ColorSpace colorSpace_ = ColorSpace.getInstance(ColorSpace.TYPE_HSV); // TODO
 
     public HSVColorSelector() {
         super("HSV");
 
-        color_ = Color.black;
+        color_ = new Color(Color.black);
     }
 
     @Override
@@ -69,9 +67,11 @@ public class HSVColorSelector extends ColorSelector {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if(receiveChangeEvent_) {
-                        float[] components = color_.getColorComponents(colorSpace_, null);
-                        components[0] = hueSlider_.value() / 359f;
-                        color_ = new Color(colorSpace_, components, 1);
+                        color_ = Color.createFromHSV(
+                                    hueSlider_.getValue(),
+                                    color_.getSaturationHSV(),
+                                    color_.getValueHSV()
+                                );
 
                         colorChanged_();
                     }
@@ -99,13 +99,11 @@ public class HSVColorSelector extends ColorSelector {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if(receiveChangeEvent_) {
-                        color_ = new Color(colorSpace_,
-                            new float[] {
-                                (Integer) hueSpinner_.getValue() / 359f,
-                                (Float) saturationSpinner_.getValue(),
-                                (Float) valueSpinner_.getValue()
-                            }, 1
-                        );
+                        color_ = Color.createFromHSV(
+                                    hueSpinner_.getValue(),
+                                    color_.getSaturationHSV(),
+                                    color_.getValueHSV()
+                                );
 
                         colorChanged_();
                     }

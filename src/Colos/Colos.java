@@ -6,7 +6,6 @@ import javax.swing.JToggleButton;
 import javax.swing.BoxLayout;
 import java.awt.FlowLayout;
 
-import java.awt.Color;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 

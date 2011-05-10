@@ -1,6 +1,5 @@
 package Colos;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.Point;
 import java.awt.geom.Point2D;

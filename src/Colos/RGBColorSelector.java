@@ -18,7 +18,6 @@ import javax.swing.event.ChangeEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.Graphics;
 import java.awt.geom.Point2D;
