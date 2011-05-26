@@ -35,10 +35,10 @@ import java.awt.geom.Line2D;
 import java.awt.Dimension;
 import java.awt.Font;
 
-public class HSVColorSelector extends ColorSelector {
+public class HSLColorSelector extends ColorSelector {
     protected IntegerModel hueModel_;
     protected IntegerModel saturationModel_;
-    protected IntegerModel valueModel_;
+    protected IntegerModel lightnessModel_;
 
     private class MouseEventLayerListener extends MouseAdapter implements MouseWheelListener {
         private JLayeredPane pane_;
@@ -85,22 +85,22 @@ public class HSVColorSelector extends ColorSelector {
         }
     }
 
-    public HSVColorSelector() {
-        super("HSV");
+    public HSLColorSelector() {
+        super("HSL");
 
         hueModel_ = new IntegerModel(0, 359, 1);
         saturationModel_ = new IntegerModel(0, 100, 1);
-        valueModel_ = new IntegerModel(0, 100, 1);
+        lightnessModel_ = new IntegerModel(0, 100, 1);
 
         ChangeListener modelListener = new ChangeListener() {
             @Override
             public void stateChanged(ChangeEvent e) {
                 if(receiveChangeEvent_) {
                     setColor(
-                        ColorProcessor.createFromHSV(
+                        ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             saturationModel_.value() / 100f,
-                            valueModel_.value() / 100f
+                            lightnessModel_.value() / 100f
                         )
                     );
                 }
@@ -109,7 +109,7 @@ public class HSVColorSelector extends ColorSelector {
 
         hueModel_.addChangeListener(modelListener);
         saturationModel_.addChangeListener(modelListener);
-        valueModel_.addChangeListener(modelListener);        
+        lightnessModel_.addChangeListener(modelListener);        
 
         initUI_();
         //color_ = Color.black;
@@ -121,8 +121,8 @@ public class HSVColorSelector extends ColorSelector {
                     public Color getColor(int x, int y) {
                         double ratio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
 
-                        return ColorProcessor.createFromHSV(
-                                (int) (ratio * 359), 1f, 1f
+                        return ColorProcessor.createFromHSL(
+                                (int) (ratio * 359), 1f, 0.5f
                         );
                     }
                 }
@@ -134,15 +134,15 @@ public class HSVColorSelector extends ColorSelector {
 
         LineSlider<Integer> saturationSlider = new LineSlider<Integer>(saturationModel_);
         saturationSlider.repaintOnChange(hueModel_);
-        saturationSlider.repaintOnChange(valueModel_);
+        saturationSlider.repaintOnChange(lightnessModel_);
         saturationSlider.setFiller(new SliderFiller() {
                     public Color getColor(int x, int y) {
                         double saturationRatio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
 
-                        return ColorProcessor.createFromHSV(
+                        return ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             (float) saturationRatio,
-                            valueModel_.value() / 100f
+                            lightnessModel_.value() / 100f
                         );
                     }
                 }
@@ -151,36 +151,36 @@ public class HSVColorSelector extends ColorSelector {
         saturationSlider.setLocation(19, 102);
         saturationSlider.setSize(-72,-72);
 
-        LineSlider<Integer> valueSlider = new LineSlider<Integer>(valueModel_);
-        valueSlider.repaintOnChange(hueModel_);
-        valueSlider.repaintOnChange(saturationModel_);
-        valueSlider.setFiller(new SliderFiller() {
+        LineSlider<Integer> lightnessSlider = new LineSlider<Integer>(lightnessModel_);
+        lightnessSlider.repaintOnChange(hueModel_);
+        lightnessSlider.repaintOnChange(saturationModel_);
+        lightnessSlider.setFiller(new SliderFiller() {
                     public Color getColor(int x, int y) {
-                        double valueRatio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
+                        double lightnessRatio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
 
-                        return ColorProcessor.createFromHSV(
+                        return ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             saturationModel_.value() / 100f,
-                            (float) valueRatio
+                            (float) lightnessRatio
                         );
                     }
                 }
         );
-        valueSlider.setThickness(11);
-        valueSlider.setLocation(111, 102);
-        valueSlider.setSize(72,-72);
+        lightnessSlider.setThickness(11);
+        lightnessSlider.setLocation(111, 102);
+        lightnessSlider.setSize(72,-72);
 
-        SurfaceSlider<Integer> saturationValueSlider = new SurfaceSlider<Integer>(saturationModel_, valueModel_);
+        SurfaceSlider<Integer> saturationValueSlider = new SurfaceSlider<Integer>(saturationModel_, lightnessModel_);
         saturationValueSlider.repaintOnChange(hueModel_);
         saturationValueSlider.setFiller(new SliderFiller() {
                     public Color getColor(int x, int y) {
                         double saturationRatio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
-                        double valueRatio = slider_.getAxisRatio(1, new Point2D.Double(x, y));
+                        double lightnessRatio = slider_.getAxisRatio(1, new Point2D.Double(x, y));
 
-                        return ColorProcessor.createFromHSV(
+                        return ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             (float) saturationRatio,
-                            (float) valueRatio
+                            (float) lightnessRatio
                         );
                     }
                 }
@@ -213,7 +213,7 @@ public class HSVColorSelector extends ColorSelector {
 
         colorPanel.add(hueSlider, 0);
         colorPanel.add(saturationSlider, 0);
-        colorPanel.add(valueSlider, 0);
+        colorPanel.add(lightnessSlider, 0);
         colorPanel.add(saturationValueSlider, 0);
 
         JPanel mouseEventLayer = new JPanel();
@@ -231,10 +231,10 @@ public class HSVColorSelector extends ColorSelector {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if(receiveChangeEvent_) {
-                        /*color_ = ColorProcessor.createFromHSV(
+                        /*color_ = ColorProcessor.createFromHSL(
                                     hueSlider_.value(),
-                                    ColorProcessor.getSaturationHSV(color_),
-                                    ColorProcessor.getValueHSV(color_)
+                                    ColorProcessor.getSaturationHSL(color_),
+                                    ColorProcessor.getLightnessHSL(color_)
                                 );
 
                         sliderChanged_ = true;
@@ -264,31 +264,31 @@ public class HSVColorSelector extends ColorSelector {
             }
         };
         SpinnerNumberModel saturationSpinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
-        SpinnerNumberModel valueSpinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
+        SpinnerNumberModel lightnessSpinnerModel = new SpinnerNumberModel(0, 0, 100, 1);
 
         synchronizeSpinnerModel(hueModel_, hueSpinnerModel);
         synchronizeSpinnerModel(saturationModel_, saturationSpinnerModel);
-        synchronizeSpinnerModel(valueModel_, valueSpinnerModel);
+        synchronizeSpinnerModel(lightnessModel_, lightnessSpinnerModel);
 
         JSpinner hueSpinner = new JSpinner(hueSpinnerModel);
         JSpinner saturationSpinner = new JSpinner(saturationSpinnerModel);
-        JSpinner valueSpinner = new JSpinner(valueSpinnerModel);
+        JSpinner lightnessSpinner = new JSpinner(lightnessSpinnerModel);
 
         JLabel hueLabel = new JLabel("H : ", JLabel.RIGHT);
         hueLabel.setLabelFor(hueSpinner);
         JLabel saturationLabel = new JLabel("S : ", JLabel.RIGHT);
         saturationLabel.setLabelFor(saturationSpinner);
-        JLabel valueLabel = new JLabel("V : ", JLabel.RIGHT);
-        valueLabel.setLabelFor(valueSpinner);
+        JLabel lightnessLabel = new JLabel("L : ", JLabel.RIGHT);
+        lightnessLabel.setLabelFor(lightnessSpinner);
 
         /*ChangeListener spinnerChangeListener = new ChangeListener() {
                 @Override
                 public void stateChanged(ChangeEvent e) {
                     if(receiveChangeEvent_) {
-                        color_ = ColorProcessor.createFromHSV(
+                        color_ = ColorProcessor.createFromHSL(
                                     (Integer) hueSpinner_.getValue(),
                                     (Integer) saturationSpinner_.getValue() / 100f,
-                                    (Integer) valueSpinner_.getValue() / 100f
+                                    (Integer) lightnessSpinner_.getValue() / 100f
                                 );
 
                         spinnerChanged_ = true;
@@ -300,7 +300,7 @@ public class HSVColorSelector extends ColorSelector {
 
         /*hueSpinner.addChangeListener(spinnerChangeListener);
         saturationSpinner.addChangeListener(spinnerChangeListener);
-        valueSpinner.addChangeListener(spinnerChangeListener);*/
+        lightnessSpinner.addChangeListener(spinnerChangeListener);*/
         
         /*JTextField hexField = new JTextField(6);
 
@@ -311,7 +311,7 @@ public class HSVColorSelector extends ColorSelector {
         synchronizeHexField(
                     hueModel_,
                     saturationModel_,
-                    valueModel_,
+                    lightnessModel_,
                     hexField
         );
 
@@ -326,8 +326,8 @@ public class HSVColorSelector extends ColorSelector {
         hsvPanel.add(hueSpinner);
         hsvPanel.add(saturationLabel);
         hsvPanel.add(saturationSpinner);
-        hsvPanel.add(valueLabel);
-        hsvPanel.add(valueSpinner);
+        hsvPanel.add(lightnessLabel);
+        hsvPanel.add(lightnessSpinner);
         
         /*JPanel hexPanel = new JPanel();
         hexPanel.setLayout(new BoxLayout(hexPanel, BoxLayout.X_AXIS));
@@ -341,21 +341,21 @@ public class HSVColorSelector extends ColorSelector {
         synchronizeColorIndicator(
                     hueModel_,
                     saturationModel_,
-                    valueModel_,
+                    lightnessModel_,
                     colorIndicator
         );
 
-        JPanel valuePanel = new JPanel();
-        valuePanel.setLayout(new BoxLayout(valuePanel, BoxLayout.Y_AXIS));
-        valuePanel.add(hsvPanel);
-        valuePanel.add(javax.swing.Box.createVerticalStrut(48));
-        //valuePanel.add(hexPanel);
-        //valuePanel.add(javax.swing.Box.createVerticalStrut(15));
-        valuePanel.add(colorIndicator);
+        JPanel lightnessPanel = new JPanel();
+        lightnessPanel.setLayout(new BoxLayout(lightnessPanel, BoxLayout.Y_AXIS));
+        lightnessPanel.add(hsvPanel);
+        lightnessPanel.add(javax.swing.Box.createVerticalStrut(48));
+        //lightnessPanel.add(hexPanel);
+        //lightnessPanel.add(javax.swing.Box.createVerticalStrut(15));
+        lightnessPanel.add(colorIndicator);
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
         add(colorPanel);
-        add(valuePanel);
+        add(lightnessPanel);
     }
 
     protected void synchronizeSpinnerModel(final IntegerModel model, final SpinnerNumberModel spinnerModel) {
@@ -377,14 +377,14 @@ public class HSVColorSelector extends ColorSelector {
     /*protected void synchronizeHexField(
                     final IntegerModel hueModel,
                     final IntegerModel saturationModel,
-                    final IntegerModel valueModel,
+                    final IntegerModel lightnessModel,
                     final JTextField hexField) {
         hueModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        Color oldColor = ColorProcessor.createFromHSV(
+                        Color oldColor = ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             saturationModel_.value() / 100f,
-                            valueModel_.value() / 100f
+                            lightnessModel_.value() / 100f
                         );
 
                         hexField.setText(
@@ -398,10 +398,10 @@ public class HSVColorSelector extends ColorSelector {
 
         saturationModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        Color oldColor = ColorProcessor.createFromHSV(
+                        Color oldColor = ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             saturationModel_.value() / 100f,
-                            valueModel_.value() / 100f
+                            lightnessModel_.value() / 100f
                         );
 
                         hexField.setText(
@@ -413,12 +413,12 @@ public class HSVColorSelector extends ColorSelector {
                 }
         );
 
-        valueModel.addChangeListener(new ChangeListener() {
+        lightnessModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        Color oldColor = ColorProcessor.createFromHSV(
+                        Color oldColor = ColorProcessor.createFromHSL(
                             hueModel_.value(),
                             saturationModel_.value() / 100f,
-                            valueModel_.value() / 100f
+                            lightnessModel_.value() / 100f
                         );
 
                         hexField.setText(
@@ -441,17 +441,17 @@ public class HSVColorSelector extends ColorSelector {
 
                             Color newColor = Color.decode(hex);
 
-                            hueModel_.setValue(ColorProcessor.getHueHSV(newColor));
-                            saturationModel_.setValue(Math.round(ColorProcessor.getSaturationHSV(newColor) * 100));
-                            valueModel_.setValue(Math.round(ColorProcessor.getValueHSV(newColor) * 100));
+                            hueModel_.setValue(ColorProcessor.getHueHSL(newColor));
+                            saturationModel_.setValue(Math.round(ColorProcessor.getSaturationHSL(newColor) * 100));
+                            lightnessModel_.setValue(Math.round(ColorProcessor.getLightnessHSL(newColor) * 100));
                         } catch(NumberFormatException ex) {
                             System.err.printf("Invalid color hex '%s'\n",
                                 hexField.getText());
 
-                            Color oldColor = ColorProcessor.createFromHSV(
+                            Color oldColor = ColorProcessor.createFromHSL(
                                 hueModel_.value(),
                                 saturationModel_.value() / 100f,
-                                valueModel_.value() / 100f
+                                lightnessModel_.value() / 100f
                             );
 
                             hexField.setText(
@@ -468,15 +468,15 @@ public class HSVColorSelector extends ColorSelector {
     protected void synchronizeColorIndicator(
                     final IntegerModel hueModel,
                     final IntegerModel saturationModel,
-                    final IntegerModel valueModel,
+                    final IntegerModel lightnessModel,
                     final JPanel colorIndicator) {
         hueModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
                         colorIndicator.setBackground(
-                            ColorProcessor.createFromHSV(
+                            ColorProcessor.createFromHSL(
                                 hueModel_.value(),
                                 saturationModel_.value() / 100f,
-                                valueModel_.value() / 100f
+                                lightnessModel_.value() / 100f
                             )
                         );
                     }
@@ -486,23 +486,23 @@ public class HSVColorSelector extends ColorSelector {
         saturationModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
                         colorIndicator.setBackground(
-                            ColorProcessor.createFromHSV(
+                            ColorProcessor.createFromHSL(
                                 hueModel_.value(),
                                 saturationModel_.value() / 100f,
-                                valueModel_.value() / 100f
+                                lightnessModel_.value() / 100f
                             )
                         );
                     }
                 }
         );
 
-        valueModel.addChangeListener(new ChangeListener() {
+        lightnessModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
                         colorIndicator.setBackground(
-                            ColorProcessor.createFromHSV(
+                            ColorProcessor.createFromHSL(
                                 hueModel_.value(),
                                 saturationModel_.value() / 100f,
-                                valueModel_.value() / 100f
+                                lightnessModel_.value() / 100f
                             )
                         );
                     }
@@ -520,13 +520,13 @@ public class HSVColorSelector extends ColorSelector {
 
         Color color = colorModel_.value();
 
-        int hue = ColorProcessor.getHueHSV(color);
-        int saturation = Math.round(ColorProcessor.getSaturationHSV(color) * 100);
-        int value = Math.round(ColorProcessor.getValueHSV(color) * 100);
+        int hue = ColorProcessor.getHueHSL(color);
+        int saturation = Math.round(ColorProcessor.getSaturationHSL(color) * 100);
+        int lightness = Math.round(ColorProcessor.getLightnessHSL(color) * 100);
 
         if(hue >= 0) hueModel_.setValue(hue);
-        if(value != 0) saturationModel_.setValue(saturation);
-        valueModel_.setValue(value);
+        if(lightness != 0) saturationModel_.setValue(saturation);
+        lightnessModel_.setValue(lightness);
 
         receiveChangeEvent_ = true;
 
@@ -535,9 +535,9 @@ public class HSVColorSelector extends ColorSelector {
         boolean updateSliders = spinnerChanged_ || hexChanged_ || colorSet_;
         boolean updateSpinners = sliderChanged_ || hexChanged_ || colorSet_;
 
-        int hue = ColorProcessor.getHueHSV(color_);
-        int saturation = Math.round(ColorProcessor.getSaturationHSV(color_) * 100);
-        int value = Math.round(ColorProcessor.getValueHSV(color_) * 100);
+        int hue = ColorProcessor.getHueHSL(color_);
+        int saturation = Math.round(ColorProcessor.getSaturationHSL(color_) * 100);
+        int lightness = Math.round(ColorProcessor.getLightnessHSL(color_) * 100);
 
         if(updateSliders) {
             if(colorSet_ || hexChanged_) {
@@ -555,9 +555,9 @@ public class HSVColorSelector extends ColorSelector {
                     hueSpinner_.setValue(hue);
                 }
 
-                valueSpinner_.setValue(value);
+                lightnessSpinner_.setValue(lightness);
 
-                if(value != 0) {
+                if(lightness != 0) {
                     saturationSpinner_.setValue(saturation);
                 }
             } else {

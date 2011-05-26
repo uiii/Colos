@@ -1,24 +1,24 @@
 package Colos;
 
+import java.awt.Color;
+
 import java.awt.Shape;
 import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 
-class LineFiller extends Filler {
+class LineSliderFiller extends SliderFiller {
     protected Color startColor_;
     protected Color endColor_;
 
-    public LineFiller(Color startColor, Color endColor) {
+    public LineSliderFiller(Color startColor, Color endColor) {
         startColor_ = startColor;
         endColor_ = endColor;
     }
 
     @Override
-    public Color getColor(Shape shape, int x, int y) {
-        Line2D line = (Line2D) shape;
-
-        Point2D point = new Point2D.Double(x, y);
+    public Color getColor(int x, int y) {
+        /*Point2D point = new Point2D.Double(x, y);
         Point2D start = line.getP1();
         Point2D end = line.getP2();
 
@@ -50,7 +50,9 @@ class LineFiller extends Filler {
         } else {
             ratio = 1.0/2.0 * (1 + middleDist / halfLength);
             if(ratio > 1) ratio = 1;
-        }
+        }*/
+
+        double ratio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
 
         Color color = new Color(
             (int)(startColor_.getRed() + 

@@ -1,5 +1,7 @@
 package Colos;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 import javax.swing.BorderFactory;
 
@@ -8,17 +10,18 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
 public abstract class ColorSelector extends JPanel {
-
     protected String name_;
-    protected Color color_;
+    protected Model<Color> colorModel_;
+
+    protected boolean receiveChangeEvent_ = true;
 
     protected transient ChangeEvent changeEvent = null;
     protected EventListenerList listenerList = new EventListenerList();
 
+    protected boolean colorSet_ = false;
+
     public ColorSelector(String name) {
         name_ = name;
-
-        initUI_();
 
         setBorder(BorderFactory.createTitledBorder(name_));
     }
@@ -27,17 +30,33 @@ public abstract class ColorSelector extends JPanel {
         return name_;
     }
 
+    public void setModel(Model<Color> model) {
+        colorModel_ = model;
+
+        colorModel_.addChangeListener(new ChangeListener() {
+                    public void stateChanged(ChangeEvent e) {
+                        if(receiveChangeEvent_) {
+                            colorChanged_();
+                        }
+                    }
+                }
+        );
+    }
+
     public Color color() {
-        return color_;
+        return colorModel_.value();
     }
 
     public void setColor(Color color) {
-        color_ = color;
-
+        receiveChangeEvent_ = false;
+        colorModel_.setValue(color);
+        receiveChangeEvent_ = true;
+        /*colorSet_ = true;
         colorChanged_();
+        colorSet_ = false;*/
     }
 
-    protected void initUI_() {
+    protected void update(Color color) {
         // need override
     }
 
@@ -65,5 +84,5 @@ public abstract class ColorSelector extends JPanel {
                 ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
             }
         }
-    }    
+    }
 }

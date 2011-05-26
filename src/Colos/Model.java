@@ -4,7 +4,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
-public abstract class Model<T> {
+public class Model<T> implements Changeable {
     protected transient ChangeEvent changeEvent = null;
     protected EventListenerList listenerList = new EventListenerList();
 
@@ -14,9 +14,15 @@ public abstract class Model<T> {
         return value_;
     }
 
-    public abstract void setValue(T setValue);
-    public abstract void adjustValue(double ratio);
-    public abstract double ratio();
+    public void setValue(T value) {
+        T oldValue = value_;
+
+        value_ = value;
+
+        if(oldValue == null || ! oldValue.equals(value)) {
+            fireStateChanged_();
+        }
+    }
 
     public void addChangeListener(ChangeListener l) {
         listenerList.add(ChangeListener.class, l);

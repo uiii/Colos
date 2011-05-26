@@ -1,5 +1,6 @@
 package Colos;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -22,11 +23,14 @@ import javax.swing.event.EventListenerList;
 
 public class CircleSlider<T> extends Slider {
 
-    protected Model<T> model_;
+    protected AdjustableModel<T> model_;
     protected Ellipse2D ellipse_;
     protected Pointer pointer_;
 
     protected int thickness_;
+
+    protected int x_;
+    protected int y_;
     
     protected int width_;
     protected int height_;
@@ -38,7 +42,7 @@ public class CircleSlider<T> extends Slider {
     protected transient ChangeEvent changeEvent = null;
     protected EventListenerList listenerList = new EventListenerList();
     
-    public CircleSlider(Model<T> model) {
+    public CircleSlider(AdjustableModel<T> model) {
         model_ = model;
 
         thickness_ = 11;
@@ -50,7 +54,8 @@ public class CircleSlider<T> extends Slider {
 
         model_.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        fireStateChanged_();
+                        //fireStateChanged_();
+                        repaint();
                     }
                 }
         );
@@ -60,10 +65,10 @@ public class CircleSlider<T> extends Slider {
         return model_.value();
     }
 
-    @Override
+    /*@Override
     public Shape shape() {
         return ellipse_;
-    }
+    }*/
 
     public void setValue(T value) {
         model_.setValue(value);
@@ -72,6 +77,9 @@ public class CircleSlider<T> extends Slider {
 
     @Override
     public void setLocation(int x, int y) {
+        x_ = x;
+        y_ = y;
+
         int halfThickness = thickness_ / 2;
 
         super.setLocation(x - halfThickness, y - halfThickness);
@@ -135,7 +143,8 @@ public class CircleSlider<T> extends Slider {
     
     public void setThickness(int thickness) {
         thickness_ = thickness;
-        setPreferredSize(new Dimension(width_, height_));
+        setLocation(x_, y_);
+        setSize(width_, height_);
     }
 
     public void setStartAngle(double angle) {
@@ -145,7 +154,7 @@ public class CircleSlider<T> extends Slider {
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        pointer_.updatePosition();
+        pointer_.update();
 
         Graphics2D g2d = (Graphics2D) g;
 
@@ -167,21 +176,25 @@ public class CircleSlider<T> extends Slider {
 
         g2d.draw(ellipse_);
 
-        g2d.setPaint(Color.white);
-
-        g2d.fill(pointer_);
+        pointer_.draw(g2d);
     }
 
     class Pointer extends Ellipse2D.Double {
         protected boolean grabbed_;
+        protected Color color_;
 
         public Pointer() {
             super();
 
-            updatePosition();
+            update();
         }
 
-        public void updatePosition() {
+        public void draw(Graphics2D g2d) {
+            g2d.setPaint(color_);
+            g2d.fill(pointer_);
+        }
+
+        public void update() {
             double ratio = model_.ratio();
             double angle = ratio * 2 * Math.PI + startAngle_;
 
@@ -198,6 +211,19 @@ public class CircleSlider<T> extends Slider {
                 2 * pointerRadius,
                 2 * pointerRadius
             );
+
+            if(filler() != null) {
+                Color color = filler().getColor((int) x, (int) y);
+                int avg = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
+
+                if(avg < 128) {
+                    color_ = Color.white;
+                } else {
+                    color_ = Color.black;
+                }
+            } else {
+                color_ = Color.white;
+            }            
         }
 
         public void setGrabbed(boolean grabbed) {
@@ -222,7 +248,7 @@ public class CircleSlider<T> extends Slider {
         return ellipseRadius;
     }
 
-    protected double pointToAngle(Point2D point) {
+    protected double pointToAngle_(Point2D point) {
         double centerDist = center_.distance(point);
         double xAxisDist = 
             new Line2D.Double(
@@ -246,12 +272,20 @@ public class CircleSlider<T> extends Slider {
 
         return angle;
     }
+    
+    public double getAxisRatio(int axisNumber, Point2D point) {
+        if(axisNumber != 0) {
+            return 0.0;
+        }
+
+        return pointToAngle_(point) / (2 * Math.PI);
+    }
 
     class MouseScaleAdapter extends MouseAdapter implements MouseWheelListener {
         public void mousePressed(MouseEvent e) {
             Point2D point = new Point2D.Double(e.getX(), e.getY());
             double dist = center_.distance(point);
-            double radius = getRadius(pointToAngle(point));
+            double radius = getRadius(pointToAngle_(point));
             double halfThickness = thickness_ / 2.0;
 
             if((radius - halfThickness - 2 <= dist)
@@ -275,7 +309,7 @@ public class CircleSlider<T> extends Slider {
             if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
                 Point2D point = new Point2D.Double(e.getX(), e.getY());
                 double dist = center_.distance(point);
-                double radius = getRadius(pointToAngle(point));
+                double radius = getRadius(pointToAngle_(point));
                 double halfThickness = thickness_ / 2.0;
 
                 if((radius - halfThickness - 2 <= dist)
@@ -292,7 +326,7 @@ public class CircleSlider<T> extends Slider {
 
         private void adjust_(MouseEvent e) {
             double ratio =
-                pointToAngle(new Point2D.Double(e.getX(), e.getY())) / (2 * Math.PI);
+                getAxisRatio(0, new Point2D.Double(e.getX(), e.getY()));
 
             model_.adjustValue(ratio);
             repaint();

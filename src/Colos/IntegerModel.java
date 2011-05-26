@@ -1,6 +1,8 @@
 package Colos;
 
-public class IntegerModel extends Model<Integer> {
+import javax.swing.SpinnerModel;
+
+public class IntegerModel extends AdjustableModel<Integer> {
     protected Integer min_;
     protected Integer max_;
     protected Integer precisionStep_;

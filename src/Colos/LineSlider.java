@@ -1,5 +1,6 @@
 package Colos;
 
+import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
@@ -22,7 +23,7 @@ import javax.swing.event.EventListenerList;
 
 public class LineSlider<T> extends Slider {
 
-    protected Model<T> model_;
+    protected AdjustableModel<T> model_;
     protected Line2D line_;
     protected Pointer pointer_;
 
@@ -36,23 +37,45 @@ public class LineSlider<T> extends Slider {
     
     class Pointer extends Ellipse2D.Double {
         protected boolean grabbed_;
+        protected Color color_;
 
         public Pointer() {
             super();
 
-            updatePosition();
+            update();
         }
 
-        public void updatePosition() {
+        public void draw(Graphics2D g2d) {
+            g2d.setPaint(color_);
+            g2d.fill(pointer_);
+        }
+
+        public void update() {
             double ratio = model_.ratio();
             double radius = (thickness_ / 2.0) - 2;
 
+            double x = line_.getP1().getX() + 0.5 + (ratio * width_);
+            double y = line_.getP1().getY() + 0.5 + (ratio * height_);
+
             setFrame (
-                line_.getP1().getX() + 0.5 + (ratio * width_) - radius,
-                line_.getP1().getY() + 0.5 + (ratio * height_) - radius,
+                x - radius,
+                y - radius,
                 2 * radius,
                 2 * radius
             );
+
+            if(filler() != null) {
+                Color color = filler().getColor((int) x, (int) y);
+                int avg = (color.getRed() + color.getGreen() + color.getBlue()) / 3;
+
+                if(avg < 128) {
+                    color_ = Color.white;
+                } else {
+                    color_ = Color.black;
+                }
+            } else {
+                color_ = Color.white;
+            }            
         }
 
         public void setGrabbed(boolean grabbed) {
@@ -66,7 +89,8 @@ public class LineSlider<T> extends Slider {
 
     class MouseScaleAdapter extends MouseAdapter implements MouseWheelListener {
         public void mousePressed(MouseEvent e) {
-            if(line_.ptSegDist(e.getX(), e.getY()) <= thickness_) {
+            if(line_.ptSegDist(e.getX(), e.getY()) <= thickness_ / 2) {
+                System.out.println("grab");
                 adjust_(e);
                 pointer_.setGrabbed(true);
             }
@@ -84,7 +108,7 @@ public class LineSlider<T> extends Slider {
 
         public void mouseWheelMoved(MouseWheelEvent e) {
             if (e.getScrollType() == MouseWheelEvent.WHEEL_UNIT_SCROLL) {
-                if(line_.ptSegDist(e.getX(), e.getY()) <= thickness_) {
+                if(line_.ptSegDist(e.getX(), e.getY()) <= thickness_ / 2) {
                     double ratio = model_.ratio();
                     ratio += e.getWheelRotation() * -0.05;
                     model_.adjustValue(ratio);
@@ -95,45 +119,12 @@ public class LineSlider<T> extends Slider {
 
         private void adjust_(MouseEvent e) {
             Point2D point = new Point2D.Double(e.getX(), e.getY());
-            Point2D start = line_.getP1();
-            Point2D end = line_.getP2();
-
-            Point2D normalVector = new Point2D.Double(
-                    start.getY() - end.getY(),
-                    end.getX() - start.getX()
-            );
-
-            Point2D middlePoint = new Point2D.Double(
-                    (start.getX() + end.getX()) / 2.0,
-                    (start.getY() + end.getY()) / 2.0
-            );
-
-            Line2D lineAxis = new Line2D.Double(middlePoint, new Point2D.Double(
-                        middlePoint.getX() + normalVector.getX(),
-                        middlePoint.getY() + normalVector.getY()
-            ));
-
-            double halfLength = start.distance(end) / 2.0;
-
-            double middleDist = lineAxis.ptLineDist(point);
-            double startDist = start.distance(point);
-            double endDist = end.distance(point);
-
-            double ratio;
-            if(startDist < endDist) {
-                ratio = 1.0/2.0 * (1.0 - middleDist / halfLength);
-                if(ratio < 0) ratio = 0;
-            } else {
-                ratio = 1.0/2.0 * (1 + middleDist / halfLength);
-                if(ratio > 1) ratio = 1;
-            }
-
-            model_.adjustValue(ratio);
+            model_.adjustValue(getAxisRatio(0, point));
             repaint();
         }
     }
 
-    public LineSlider(Model<T> model) {
+    public LineSlider(AdjustableModel<T> model) {
         model_ = model;
 
         thickness_ = 11;
@@ -145,20 +136,63 @@ public class LineSlider<T> extends Slider {
 
         model_.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        fireStateChanged_();
+                        repaint();
+                        //fireStateChanged_();
                     }
                 }
         );
+    }
+
+    @Override
+    public double getAxisRatio(int axisNumber, Point2D point) {
+        if(axisNumber != 0) {
+            return 0.0;
+        }
+
+        Point2D start = line_.getP1();
+        Point2D end = line_.getP2();
+
+        Point2D normalVector = new Point2D.Double(
+                start.getY() - end.getY(),
+                end.getX() - start.getX()
+        );
+
+        Point2D middlePoint = new Point2D.Double(
+                (start.getX() + end.getX()) / 2.0,
+                (start.getY() + end.getY()) / 2.0
+        );
+
+        Line2D lineAxis = new Line2D.Double(middlePoint, new Point2D.Double(
+                    middlePoint.getX() + normalVector.getX(),
+                    middlePoint.getY() + normalVector.getY()
+        ));
+
+        double halfLength = start.distance(end) / 2.0;
+
+        double middleDist = lineAxis.ptLineDist(point);
+        double startDist = start.distance(point);
+        double endDist = end.distance(point);
+
+        double ratio;
+        if(startDist < endDist) {
+            ratio = 1.0/2.0 * (1.0 - middleDist / halfLength);
+            if(ratio < 0) ratio = 0;
+        } else {
+            ratio = 1.0/2.0 * (1 + middleDist / halfLength);
+            if(ratio > 1) ratio = 1;
+        }
+
+        return ratio;
     }
 
     public T value() {
         return model_.value();
     }
 
-    @Override
+    /*@Override
     public Shape shape() {
         return line_;
-    }
+    }*/
 
     public void setValue(T value) {
         model_.setValue(value);
@@ -237,14 +271,20 @@ public class LineSlider<T> extends Slider {
     }
     
     public void setThickness(int thickness) {
+        Point loc = getLocation();
+        int x = (int) loc.getX() + thickness_ / 2;
+        int y = (int) loc.getY() + thickness_ / 2;
+
         thickness_ = thickness;
+
+        setLocation(x, y);
         setPreferredSize(new Dimension(width_, height_));
     }
 
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        pointer_.updatePosition();
+        pointer_.update();
 
         Graphics2D g2d = (Graphics2D) g;
 
@@ -267,9 +307,7 @@ public class LineSlider<T> extends Slider {
         g2d.draw(line_);
         g2d.fill(line_);
 
-        g2d.setPaint(Color.white);
-
-        g2d.fill(pointer_);
+        pointer_.draw(g2d);
     }
 
     public void addChangeListener(ChangeListener l) {

@@ -10,6 +10,7 @@ public class Main {
                         Colos picker = new Colos();
                         picker.registerColorSelector(new RGBColorSelector());
                         picker.registerColorSelector(new HSVColorSelector());
+                        picker.registerColorSelector(new HSLColorSelector());
                         picker.setVisible(true);
                     }
                 }
