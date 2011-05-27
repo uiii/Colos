@@ -24,8 +24,14 @@ public abstract class SliderFiller implements Paint {
     protected int y_offset_;
 
     protected Color[][] cache_; // TODO cache cely slider (JPanel)
+    protected int[][] cacheInfo_; // TODO cache cely slider (JPanel)
+
+    protected int validityKey_ = 0;
     protected int validCacheX_;
     protected int validCacheY_;
+
+    protected int cacheWidth_ = 0;
+    protected int cacheHeight_ = 0;
 
     public SliderFiller() {
         invalidateCache();
@@ -33,18 +39,31 @@ public abstract class SliderFiller implements Paint {
 
     public void setSlider(Slider slider) {
         slider_ = slider;
+    }
 
-        cache_ = new Color[slider_.getWidth()][slider_.getHeight()];
-        cache_[0][0] = Color.gray;
+    private void initCache() {
+        int width = slider_.getWidth() + 1;
+        int height = slider_.getHeight() + 1;
+        if(cacheWidth_ != width || cacheHeight_ != height) {
+            cache_ = new Color[width][height];
+            cacheInfo_ = new int[width][height];
+            cacheWidth_ = width;
+            cacheHeight_ = height;
+            System.out.printf("init %s %s\n", cacheWidth_, cacheHeight_);
+            //cache_[0][0] = Color.gray;
+        }
     }
 
     public void invalidateCache() {
-        validCacheX_ = 0;
-        validCacheY_ = 0;
+        validityKey_ = (validityKey_ + 1) % 1000;
+        /*validCacheX_ = 0;
+        validCacheY_ = 0;*/
     }
     
     public boolean cacheIsValid(int x, int y) {
-        return x <= validCacheX_ && y <= validCacheY_;
+        //System.out.printf("%s == %s\n", cacheInfo_[x][y], validityKey_);
+        return cacheInfo_[x][y] == validityKey_;
+        //return x <= validCacheX_ && y <= validCacheY_;
     }
 
     public Color getCachedColor(int x, int y) {
@@ -52,9 +71,11 @@ public abstract class SliderFiller implements Paint {
     }
 
     public void cacheColor(int x, int y, Color color) {
-        //cache_[x][y] = color;
-        validCacheX_ = x;
-        validCacheY_ = y;
+        //System.out.printf("set cache %s\n", validityKey_);
+        cache_[x][y] = color;
+        cacheInfo_[x][y] = validityKey_;
+        //validCacheX_ = x;
+        //validCacheY_ = y;
     }
 
     public abstract Color getColor(int x, int y);
@@ -84,6 +105,7 @@ public abstract class SliderFiller implements Paint {
         y_offset_ = - (int)point.getY();
         
         //System.out.printf("create \n\t%s\n\t%s\n\t%s\n\n", userBounds, deviceBounds, point);
+        initCache();
 
         return new PaintContext() {
             protected final int x_offset = x_offset_;
@@ -108,8 +130,8 @@ public abstract class SliderFiller implements Paint {
                         //System.out.printf("<%s, %s>{%s, %s} - ", x, y, x_offset, y_offset);
                         Color color;
 
-                        if(cacheIsValid(x, y) && false) {
-                            color = getCachedColor(0, 0);
+                        if(cacheIsValid(x, y)) {
+                            color = getCachedColor(x, y);
                         } else {
                             color = getColor(x, y);
                             //color = Color.gray;
@@ -133,7 +155,7 @@ public abstract class SliderFiller implements Paint {
     }
 
     public int getTransparency() {
-        return Transparency.OPAQUE;//TRANSLUCENT;
+        return Transparency.TRANSLUCENT;
     }
 
 }

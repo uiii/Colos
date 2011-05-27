@@ -31,7 +31,7 @@ public abstract class Slider extends JPanel {
         object.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
                         if(filler_ != null) {
-                            //filler_.invalidateCache();
+                            filler_.invalidateCache();
                         }
 
                         repaint();
