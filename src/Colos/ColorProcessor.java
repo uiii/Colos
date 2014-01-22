@@ -3,6 +3,9 @@ package Colos;
 import java.awt.Color;
 import java.awt.color.ColorSpace;
 
+/**
+ * Contains some useful methods to process colors
+ */
 public class ColorProcessor {
     private static Color color_ = null;
 
@@ -23,22 +26,27 @@ public class ColorProcessor {
     private static float saturationHSL_ = -1;
     private static float lightnessHSL_ = -1;
 
+    /**
+     * Creates a color from the HSV color space components
+     */
     public static Color createFromHSV(int hue, float saturation, float value) {
         int[] rgb = HSVtoRGB(hue, saturation, value);
 
         return new Color(rgb[0], rgb[1], rgb[2]);
     }
 
+    /**
+     * Creates a color from the HSL color space components
+     */
     public static Color createFromHSL(int hue, float saturation, float lightness) {
         int[] rgb = HSLtoRGB(hue, saturation, lightness);
 
         return new Color(rgb[0], rgb[1], rgb[2]);
     }
 
-    /*public static Color createFromCMYK(int cyan, int magenta, int yellow, int black) {
-        return new Color();
-    }*/
-
+    /**
+     * Convers the HSV color space components to the RGB color space components
+     */
     public static int[] HSVtoRGB(int hue, float saturation, float value) {
         hue = hue % 360;
         float chroma = value * saturation;
@@ -71,6 +79,9 @@ public class ColorProcessor {
         };
     }
 
+    /**
+     * Convers the HSL color space components to the RGB color space components
+     */
     public static int[] HSLtoRGB(int hue, float saturation, float lightness) {
         hue = hue % 360;
         float chroma = (1 - Math.abs(2 * lightness - 1)) * saturation;
@@ -103,6 +114,9 @@ public class ColorProcessor {
         };
     }
 
+    /**
+     * Gets HSV hue from the color
+     */
     public static int getHueHSV(Color color) {
         changeColor_(color);
 
@@ -130,6 +144,9 @@ public class ColorProcessor {
         return hue_;
     }
 
+    /**
+     * Gets HSV saturation from the color
+     */
     public static float getSaturationHSV(Color color) {
         changeColor_(color);
 
@@ -146,6 +163,9 @@ public class ColorProcessor {
         return saturationHSV_;
     }
 
+    /**
+     * Gets HSV value from the color
+     */
     public static float getValueHSV(Color color) {
         changeColor_(color);
 
@@ -158,10 +178,16 @@ public class ColorProcessor {
         return valueHSV_;
     }
 
+    /**
+     * Gets HSL hue from the color
+     */
     public static int getHueHSL(Color color) {
         return getHueHSV(color);
     }
 
+    /**
+     * Gets HSL saturation from the color
+     */
     public static float getSaturationHSL(Color color) {
         changeColor_(color);
 
@@ -178,6 +204,9 @@ public class ColorProcessor {
         return saturationHSL_;
     }
 
+    /**
+     * Gets HSL lightness from the color
+     */
     public static float getLightnessHSL(Color color) {
         changeColor_(color);
 

@@ -19,36 +19,18 @@ import java.util.ListIterator;
 import java.awt.Toolkit;
 import java.awt.Dimension;
 
+/**
+ * Represents Colos main class
+ */
 public class Colos extends JFrame {
-
-    protected Color color_;
-
     protected JPanel buttonPanel_;
     protected JPanel selectorPanel_;
 
     protected LinkedList<ColorSelector> selectors_ = new LinkedList<ColorSelector>();
 
-    //protected boolean receiveChangeEvent_ = true;
-
     protected Model<Color> colorModel_;
 
     protected int visibleSelectors_ = 0;
-
-    /*protected class SelectorChangeListener implements ChangeListener {
-            protected ColorSelector selector_;
-
-            public SelectorChangeListener(ColorSelector selector) {
-                selector_ = selector;
-            }
-
-            public void stateChanged(ChangeEvent e) {
-                if(receiveChangeEvent_) {
-                    color_ = selector_.color();
-
-                    colorChanged_(selector_);
-                }
-            }
-    }*/
 
     protected class SelectorButtonClickListener implements ActionListener {
             protected ColorSelector selector_;
@@ -76,6 +58,9 @@ public class Colos extends JFrame {
             }
     }
 
+    /**
+     * Colos's constructor
+     */
     public Colos() {
         colorModel_ = new Model<Color>();
         colorModel_.setValue(Color.black);
@@ -83,10 +68,18 @@ public class Colos extends JFrame {
         initUI_();
     }
 
+    /**
+     * Registers new color selector.
+     *
+     * Selector will be shown as and separated panel. Can be shown or hidden
+     * by clicking on selector's button.
+     *
+     * @param selector
+     *     Selector to register
+     */
     public void registerColorSelector(ColorSelector selector) {
         selector.setModel(colorModel_);
         selector.setVisible(false);
-        //selector.addChangeListener(new SelectorChangeListener(selector));
 
         JToggleButton selectorButton = new JToggleButton(selector.name());
         selectorButton.addActionListener(new SelectorButtonClickListener(selectorButton, selector));
@@ -131,22 +124,6 @@ public class Colos extends JFrame {
         setLayout(new FlowLayout());
         
         setTitle("Colos");
-        //setSize(300, 200);
-        //setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-
-    /*private void colorChanged_(ColorSelector sourceSelector) {
-        receiveChangeEvent_ = false;
-
-        ListIterator<ColorSelector> it = selectors_.listIterator();
-        while(it.hasNext()) {
-            ColorSelector selector = it.next();
-            if(selector != sourceSelector) {
-                selector.setColor(color_);
-            }
-        }
-
-        receiveChangeEvent_ = true;
-    }*/
 }

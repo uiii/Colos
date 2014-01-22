@@ -1,0 +1,12 @@
+\select@language {czech}
+\contentsline {section}{\numberline {1}\IeC {\'U}vod}{2}{section.1}
+\contentsline {section}{\numberline {2}D\IeC {\r u}vod tvorby}{2}{section.2}
+\contentsline {section}{\numberline {3}Sestaven\IeC {\'\i }}{2}{section.3}
+\contentsline {section}{\numberline {4}Implementace}{2}{section.4}
+\contentsline {subsection}{\numberline {4.1}Unix}{2}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Windows}{3}{subsection.4.2}
+\contentsline {subsection}{\numberline {4.3}Vstupn\IeC {\'\i } za\IeC {\v r}\IeC {\'\i }zen\IeC {\'\i }}{3}{subsection.4.3}
+\contentsline {subsubsection}{\numberline {4.3.1}Kl\IeC {\'a}vesnice}{3}{subsubsection.4.3.1}
+\contentsline {subsubsection}{\numberline {4.3.2}My\IeC {\v s}}{4}{subsubsection.4.3.2}
+\contentsline {subsubsection}{\numberline {4.3.3}Syst\IeC {\'e}m - p\IeC {\v r}\IeC {\'\i }kazy}{4}{subsubsection.4.3.3}
+\contentsline {subsection}{\numberline {4.4}Actions}{4}{subsection.4.4}

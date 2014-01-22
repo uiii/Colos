@@ -7,51 +7,33 @@ import java.awt.Point;
 import java.awt.geom.Point2D;
 import java.awt.geom.Line2D;
 
+/**
+ * Slider filler used to fill lines with color on both ends
+ */
 class LineSliderFiller extends SliderFiller {
     protected Color startColor_;
     protected Color endColor_;
 
+    /**
+     * LineSliderFiller's constructor
+     *
+     * @param startColor
+     *     Color to draw on the starting end of line
+     * @param endColor
+     *     Color to draw on the ending end of line
+     */
     public LineSliderFiller(Color startColor, Color endColor) {
         startColor_ = startColor;
         endColor_ = endColor;
     }
 
+    /**
+     * Gets color for the pixels on the line
+     *
+     * Makes a gradient between both end colors
+     */
     @Override
     public Color getColor(int x, int y) {
-        /*Point2D point = new Point2D.Double(x, y);
-        Point2D start = line.getP1();
-        Point2D end = line.getP2();
-
-        Point2D normalVector = new Point2D.Double(
-                start.getY() - end.getY(),
-                end.getX() - start.getX()
-        );
-
-        Point2D middlePoint = new Point2D.Double(
-                (start.getX() + end.getX()) / 2.0,
-                (start.getY() + end.getY()) / 2.0
-        );
-
-        Line2D lineAxis = new Line2D.Double(middlePoint, new Point2D.Double(
-                    middlePoint.getX() + normalVector.getX(),
-                    middlePoint.getY() + normalVector.getY()
-        ));
-
-        double halfLength = start.distance(end) / 2.0;
-
-        double middleDist = lineAxis.ptLineDist(point);
-        double startDist = start.distance(point);
-        double endDist = end.distance(point);
-
-        double ratio;
-        if(startDist < endDist) {
-            ratio = 1.0/2.0 * (1.0 - middleDist / halfLength);
-            if(ratio < 0) ratio = 0;
-        } else {
-            ratio = 1.0/2.0 * (1 + middleDist / halfLength);
-            if(ratio > 1) ratio = 1;
-        }*/
-
         double ratio = slider_.getAxisRatio(0, new Point2D.Double(x, y));
 
         Color color = new Color(

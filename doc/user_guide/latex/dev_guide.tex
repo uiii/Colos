@@ -1,0 +1,60 @@
+\documentclass[12pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[czech]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
+\newcommand{\noun}[1]{\textsc{#1}}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\cmake}{\noun{CMake} }
+\newcommand{\fakeinput}{\noun{FakeInput} }
+
+\begin{document}
+\input{./dev_title.tex}
+
+\tableofcontents
+\newpage
+
+\section{Úvod}
+Knihovna \noun{FakeInput} umožňuje velice snadno simulovat uživatelský vstup. Lze simulovat události jako stisk klávesy na klávesnici, pohyb myši atd. Vstupní zařízení, které knihovna podporuje (umí simulovat) jsou dvě - \emph{klávesnice} a \emph{myš}. Mimoto ji lze využít i pro automatizované spouštění libovolných \emph{programů}. Knihovna je \emph{multiplatformní}, lze ji tedy využít na \emph{Unix-like} platformách a na platformě \emph{Windows}.
+
+\section{Důvod tvorby}
+Důvod, proč tvořit tuto knihovnu, byl, že jsem nenašel nic podobného, co by splnilo moje požadavky. Nalezl jsem knihovnu \href{http://www.codeproject.com/KB/library/InputManager.aspx}{InputManager}. Ta by jistě splnila moje požadavky, problém je ale v tom, že je pouze pro \emph{Windows}, přičemž moje hlavní preference bylo fungování na \emph{Unix-like} platformách. Co se týče používání a možností tak je na tom FakeInput a InputManager vcelku podobně. InputManager tedy garantuje, že funguje správně s DirectX, což já zaručit nemohu, dokonce jsem neměl možnost to ani otestovat. Co se týče dalších knihoven tak zde asi můj výčet končí, nevylučuji, že něco existuje, já to akorát nenašel. Podařilo se mi ještě najít nějaké nástroje provádějící podobnou činnost, jedná se ale už o hotové aplikace nevyužitelné jako knihovna a navíc většinou nejsou zadarmo.
+
+\section{Sestavení}
+    viz. Uživatelská dokumentace
+
+\section{Implementace}
+    Popis rozhraní jednotlivých tříd je v API dokumentaci.
+
+    \subsection{Unix}
+    Na \emph{Unixu} knihovna využívá knihovny \textbf{Xlib},
+    která se vyskytuje defaultně snad na každém \emph{Unix-like} systému, který používá grafické prostředí.
+    Zároveň s knihovnou Xlib se vyskytuje její rozšíření \textbf{XTest}, které právě slouží k simulování vstupních událostí. Využívají se k tomu funkce jako \code{XTestFakeKeyEvent} pro klávesnici nebo \code{XTestFakeButtonEvent} pro myš atd.
+
+    \subsection{Windows}
+    Na \emph{Windows} jsem použil možnotí rozhraní \textbf{Win32 API}. Obsahuje přímo vlatní funkci \code{SendInput} pro zasílání události do systému.
+
+    \subsection{Vstupní zařízení}
+    Bylo třeba se vypořádat s mírně rozdílnými přístupy k některým věcem na jednotlivých platformách. Např. na knihovna \textbf{Xlib} má zástupné kódy za tlačítka myši, kdežto \textbf{WinAPI} nemá kódy pro tlačítka, ale přímo pro události, jako \uv{stisk levého tlačítka myši} atd.
+
+    \subsubsection{Klávesnice}
+    Nejproblematičtější oblast je rozhodně klávesnice. Na klávesnici je obrovské množství možných událostí i když jsou jen jednoho ze dvou druhů - stisk nebo uvolnení klávesy. Jenže kláves je hodně, chovají se se různě při stisku modifikačních kláves a navíc jejich chování také ovlivňuje i nastavení rozložení a jazyka klávesnice v systému.
+    
+    Problém je v reprezentaci kláves na jednotlivých platformách, na \emph{Unixu} je reprezentují tzv. \code{KeySym}y což je číslo označující konkrétní klávesu. Pokrývají několik kódování, takže lze reprezentovat klávesu z různých jazyků a rozložení klávesnice. \emph{Windows} má množinu reprezentujících kódů (\code{Virtual-Key codes}) mnohem menší, v podstatě obsahuje pouze klávesy z anglického rozložení klávesnice. Jednotlivé kódy na obou platformách reprezentují stejně klávesu na klávesnici ne znak atd., tzn. několik kódů může označovat jednu klávesu a ta se chová podle nasteveného rozložení klávesnice. Např. pokud zvolím na \emph{Unixu} kód klávesy \code{XK\_4} a \code{XK\_ccaron} tak oba reprezentují klávesu s číslem '4' a písmenkem 'č' na České klávesnici. Když pošlu stisk této klávesy do systému, tak nemám zaručeno zda se mi vytiskne znak '4' nebo 'č' záleží to na nastaveném rozložení klávesnice. Tedy pokud chce uživatel knihovny využít možnosti pracovat s klávesami pomocí kódů jednotlivých platforem, což knihovna umožnuje, tak nemá zaručeno jaký bude výsledek zaslané akce, pouze že se simuloval stisk klávesy příslušející danému kódu.
+    
+    Aby bylo možné pracovat s typy kláves (např. explicitně říct, chci aby se stiskla klávesa \code{Enter}) bez nutnosti používat platformě závislé kódy, definuje knihovna několik takových typů. Jedná se o běžně známé klávesy z anglické klávesnice, jedná se o množinů kódů která se mapuje do podmnožiny průniku kódů kláves na \emph{Unixu} a na \emph{Windows}. Všechny typy jsou uvedeny v souboru \code{types.hpp}.
+    
+    Pokud chce mít uživatel knihovny větší jistotu, že zasílá stisk nebo uvolnění klávesy, kterou má opravdu na mysli, může využít možnosti získat klávesu z reálné události generované fyzickým stiskem klávesy na klávesnici. Toto je už ale platformně závislé, protože každá platforma používá jiné struktury pro události a je tedy potřeba s nimi jinak zacházet. Na \emph{Unixu} je to \code{XEvent} na \emph{Windows} \code{MSG}, z těchto ztruktur lze získat potřebné informace o klávese, tedy pokud se jedné o události týkající se kláves.
+
+    \subsubsection{Myš}
+    Narozdíl od klávesnice je myš skoro všude stejná až na nějaká speciální tlačítka navíc, které prostě knihovna podporovat nebude. Takže je podporována simulace stisků tří základních tlačítek (levé, pravé, prostřední/kolečko), rotace kolečkem a pohyb kurzorem. Ze jedinou komplikaci lze považovat, že na \emph{Windows} je potřeba při nastavování pozice kurzoru souřadnice normalizovat, což ale není v podstatě žádný problém, pokud se ví jak na to :-). Po nějaké době hledání na internetu jsem to vyřešil, jak, to je možné najít v kódu \code{mouse\_win.cpp}.
+
+    \subsubsection{Systém - příkazy}
+    Vykonávání příkazů pro příkazovou řádku se řeší velice snadno pomocí funkce \code{system}, která je dostupná na obou platformách. Je třeba ošetřit jednu věc na každé platformě. Na \emph{Unixu} je potřeba dát na konec příkazu \code{\&} aby se spustil na pozadí a neblokoval výpočet. Na \emph{Windows} je zase potřeba, aby se příkaz správně provedl, dát před něj slovo \code{start}.
+
+    \subsection{Actions}
+    Aby se s knihovnou lépe pracovalo a aby bylo možné události k zasílání nějak uchovávat a vyvolávat podle potřeby obsahuje knihovna rozšíření \emph{Actions}. Pracuje s ackemi reprezentujícími události určené k zaslání do systému na rozdíl od základní knihovny, která v podstatě reprezentuje pouze vstupní zařízení ne události samotné. V kódu rozšíření již není použit žádný platformě závislý kód, je to čistě nadstavba nad základní knihovnou. Důležitou vlastností, kterou rozšíření přináší je možnost řetezit akce za sebou a pak je najednou provádět. Více o používání v Uživatelské dokumentaci.
+
+\end{document}

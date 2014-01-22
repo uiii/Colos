@@ -2,6 +2,9 @@ package Colos;
 
 import javax.swing.SwingUtilities;
 
+/**
+ * Creates new Colos instance and registeres color selectors.
+ */
 public class Main {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(

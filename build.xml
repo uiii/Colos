@@ -5,6 +5,7 @@
 
 	<property name="build.dir" value="build"/>
 	<property name="bin.dir" value="bin"/>
+	<property name="doc.dir" value="doc"/>
 
 	<property name="main-class" value="${ant.project.name}.Main"/>
 
@@ -24,6 +25,15 @@
 			</manifest>
 		</jar>
 	</target>
+
+    <target name="doc">
+        <exec executable="javadoc">
+            <arg value="-d" /><arg value="${doc.dir}/javadoc" />
+            <arg value="-sourcepath" /><arg value="${src.dir}" />
+            <arg value="Colos" />
+            <arg value="-public" />
+        </exec>
+    </target>
 
 	<target name="run" depends="jar">
 		<java jar="${bin.dir}/${ant.project.name}.jar" fork="true"/>

@@ -9,7 +9,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
-public abstract class ColorSelector extends JPanel {
+/**
+ * Can be used to select color
+ */
+public abstract class ColorSelector extends JPanel implements Changeable {
     protected String name_;
     protected Model<Color> colorModel_;
 
@@ -20,16 +23,31 @@ public abstract class ColorSelector extends JPanel {
 
     protected boolean colorSet_ = false;
 
+    /**
+     * ColorSelector's constructor
+     *
+     * @param name
+     *     Name of the selector
+     */
     public ColorSelector(String name) {
         name_ = name;
 
         setBorder(BorderFactory.createTitledBorder(name_));
     }
 
+    /**
+     * Gets the name of the selector
+     */
     public String name() {
         return name_;
     }
 
+    /**
+     * Sets model to the selector which stores the selected color
+     *
+     * @param model
+     *     Model which will store selected color
+     */
     public void setModel(Model<Color> model) {
         colorModel_ = model;
 
@@ -43,31 +61,22 @@ public abstract class ColorSelector extends JPanel {
         );
     }
 
-    public Color color() {
-        return colorModel_.value();
-    }
-
-    public void setColor(Color color) {
+    protected void setColor(Color color) {
         receiveChangeEvent_ = false;
         colorModel_.setValue(color);
         receiveChangeEvent_ = true;
-        /*colorSet_ = true;
-        colorChanged_();
-        colorSet_ = false;*/
-    }
-
-    protected void update(Color color) {
-        // need override
     }
 
     protected void colorChanged_() {
         // need override
     }
 
+    @Override
     public void addChangeListener(ChangeListener l) {
         listenerList.add(ChangeListener.class, l);
     }
     
+    @Override
     public void removeChangeListener(ChangeListener l) {
         listenerList.remove(ChangeListener.class, l);
     }

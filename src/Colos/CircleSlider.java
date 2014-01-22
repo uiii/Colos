@@ -21,6 +21,13 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
+/**
+ * Represents 1-dimensional elliptical slider.
+ *
+ * Slider is specified by the ellipse. Ellipse defines
+ * how it will look and also is considered as slider
+ * axis. Pointer can move along the ellipse.
+ */
 public class CircleSlider<T> extends Slider {
 
     protected AdjustableModel<T> model_;
@@ -42,6 +49,12 @@ public class CircleSlider<T> extends Slider {
     protected transient ChangeEvent changeEvent = null;
     protected EventListenerList listenerList = new EventListenerList();
     
+    /**
+     * CircleSlider's constructor
+     *
+     * @param model
+     *     Model spicifying values on slider axis (ellipse)
+     */
     public CircleSlider(AdjustableModel<T> model) {
         model_ = model;
 
@@ -54,25 +67,20 @@ public class CircleSlider<T> extends Slider {
 
         model_.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        //fireStateChanged_();
                         repaint();
                     }
                 }
         );
     }
 
+    /**
+     * Gets value of slider's model
+     *
+     * @return
+     *     Value of slider's model
+     */
     public T value() {
         return model_.value();
-    }
-
-    /*@Override
-    public Shape shape() {
-        return ellipse_;
-    }*/
-
-    public void setValue(T value) {
-        model_.setValue(value);
-        repaint();
     }
 
     @Override
@@ -90,6 +98,9 @@ public class CircleSlider<T> extends Slider {
         setSize((int) d.getWidth(), (int) d.getHeight());
     }
 
+    /**
+     * Sets slider's size whereby specifies the slider's ellipse
+     */
     public void setSize(int width, int height) {
         int startX;
         int startY;
@@ -141,16 +152,29 @@ public class CircleSlider<T> extends Slider {
         }
     }
     
+    /**
+     * Set thickes of the stroke which will draw the ellipse
+     *
+     * @param thickness
+     *     Thickness of the stroke
+     */
     public void setThickness(int thickness) {
         thickness_ = thickness;
         setLocation(x_, y_);
         setSize(width_, height_);
     }
 
+    /**
+     * Sets the angle where the pointer will be at run of application
+     *
+     * @param angle
+     *     Start angle
+     */
     public void setStartAngle(double angle) {
         startAngle_ = angle;
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -273,6 +297,7 @@ public class CircleSlider<T> extends Slider {
         return angle;
     }
     
+    @Override
     public double getAxisRatio(int axisNumber, Point2D point) {
         if(axisNumber != 0) {
             return 0.0;
@@ -330,28 +355,6 @@ public class CircleSlider<T> extends Slider {
 
             model_.adjustValue(ratio);
             repaint();
-        }
-    }
-
-    public void addChangeListener(ChangeListener l) {
-        listenerList.add(ChangeListener.class, l);
-    }
-    
-    public void removeChangeListener(ChangeListener l) {
-        listenerList.remove(ChangeListener.class, l);
-    }
-
-    protected void fireStateChanged_() 
-    {
-        Object[] listeners = listenerList.getListenerList();
-        for(int i = listeners.length - 2; i >= 0; i -=2 ) {
-            if(listeners[i] == ChangeListener.class) {
-                if(changeEvent == null) {
-                    changeEvent = new ChangeEvent(this);
-                }
-
-                ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
-            }          
         }
     }
 }

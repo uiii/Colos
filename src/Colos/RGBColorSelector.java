@@ -39,6 +39,9 @@ import java.awt.Font;
 
 import java.util.Formatter;
 
+/**
+ * Can be used to select color using RGB color space
+ */
 public class RGBColorSelector extends ColorSelector {
     protected IntegerModel redModel_;
     protected IntegerModel greenModel_;
@@ -89,6 +92,9 @@ public class RGBColorSelector extends ColorSelector {
         }
     }
 
+    /**
+     * RGBColorSelector's constructor
+     */
     public RGBColorSelector() {
         super("RGB");
 
@@ -242,8 +248,6 @@ public class RGBColorSelector extends ColorSelector {
         // COLOR PANEL
         JLayeredPane colorPanel = new JLayeredPane();
         colorPanel.setPreferredSize(new Dimension(200, 205));
-        colorPanel.setBackground(new Color(80, 80, 80));
-        //colorPanel.setOpaque(true);
 
         colorPanel.add(redSlider, 0);
         colorPanel.add(greenSlider, 0);
@@ -264,42 +268,6 @@ public class RGBColorSelector extends ColorSelector {
 
         colorPanel.add(mouseEventLayer, new Integer(1));
 
-        /*JPanel hexagonPanel = new JPanel() {
-            public void paint(Graphics g) {
-                super.paint(g);
-
-                Graphics2D g2d = (Graphics2D) g;
-
-                setDoubleBuffered(true);
-                g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING,
-                                java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-
-                g2d.setStroke(
-                        new java.awt.BasicStroke(
-                            (float) 7,
-                            java.awt.BasicStroke.CAP_ROUND,
-                            java.awt.BasicStroke.JOIN_ROUND
-                        )
-                );
-
-                java.awt.geom.GeneralPath hexagon = new java.awt.geom.GeneralPath();
-                hexagon.moveTo(100, -8);
-                hexagon.lineTo(193, 45);
-                hexagon.lineTo(193, 154);
-                hexagon.lineTo(100, 209);
-                hexagon.lineTo(7, 154);
-                hexagon.lineTo(7, 45);
-                hexagon.closePath();
-
-                g2d.draw(hexagon);
-            }
-        };
-
-        hexagonPanel.setBounds(0, 0, 200, 250);
-        hexagonPanel.setOpaque(false);
-
-        colorPanel.add(hexagonPanel, 0);*/
-
         JTextField hexField = new JTextField(5);
         hexField.setMaximumSize(hexField.getPreferredSize());
         hexField.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -317,7 +285,6 @@ public class RGBColorSelector extends ColorSelector {
 
         JPanel rgbPanel = new JPanel();
         rgbPanel.setLayout(new GridLayout(3, 2, 0, 5));
-        //rgbPanel.setBorder(new EmptyBorder(0, 0, 15, 0));
 
         rgbPanel.add(redLabel);
         rgbPanel.add(redSpinner);
@@ -378,7 +345,6 @@ public class RGBColorSelector extends ColorSelector {
                     final JTextField hexField) {
         redModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        //hexField_.setText(Integer.toHexString(color.getRGB()).substring(2, 8));
                         hexField.setText(
                             toHexString(redModel_.value())
                             + toHexString(greenModel_.value())
@@ -390,7 +356,6 @@ public class RGBColorSelector extends ColorSelector {
 
         greenModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        //hexField_.setText(Integer.toHexString(color.getRGB()).substring(2, 8));
                         hexField.setText(
                             toHexString(redModel_.value())
                             + toHexString(greenModel_.value())
@@ -402,7 +367,6 @@ public class RGBColorSelector extends ColorSelector {
 
         blueModel.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
-                        //hexField_.setText(Integer.toHexString(color.getRGB()).substring(2, 8));
                         hexField.setText(
                             toHexString(redModel_.value())
                             + toHexString(greenModel_.value())
@@ -498,7 +462,5 @@ public class RGBColorSelector extends ColorSelector {
         blueModel_.setValue(color.getBlue());
 
         receiveChangeEvent_ = true;
-
-        //fireStateChanged_();
     }
 }

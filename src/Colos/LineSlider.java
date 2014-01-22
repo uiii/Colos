@@ -21,6 +21,11 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.EventListenerList;
 
+/**
+ * Represents line slider.
+ *
+ * Line slider is specified by line along which can pointer move.
+ */
 public class LineSlider<T> extends Slider {
 
     protected AdjustableModel<T> model_;
@@ -90,7 +95,6 @@ public class LineSlider<T> extends Slider {
     class MouseScaleAdapter extends MouseAdapter implements MouseWheelListener {
         public void mousePressed(MouseEvent e) {
             if(line_.ptSegDist(e.getX(), e.getY()) <= thickness_ / 2) {
-                System.out.println("grab");
                 adjust_(e);
                 pointer_.setGrabbed(true);
             }
@@ -124,6 +128,12 @@ public class LineSlider<T> extends Slider {
         }
     }
 
+    /**
+     * LineSlider's constructor
+     *
+     * @param model
+     *     Model spicifying values on slider's axis
+     */
     public LineSlider(AdjustableModel<T> model) {
         model_ = model;
 
@@ -137,7 +147,6 @@ public class LineSlider<T> extends Slider {
         model_.addChangeListener(new ChangeListener() {
                     public void stateChanged(ChangeEvent e) {
                         repaint();
-                        //fireStateChanged_();
                     }
                 }
         );
@@ -185,18 +194,14 @@ public class LineSlider<T> extends Slider {
         return ratio;
     }
 
+    /**
+     * Gets slider's model value
+     *
+     * @return
+     *     Value of slider's model
+     */
     public T value() {
         return model_.value();
-    }
-
-    /*@Override
-    public Shape shape() {
-        return line_;
-    }*/
-
-    public void setValue(T value) {
-        model_.setValue(value);
-        repaint();
     }
 
     @Override
@@ -211,6 +216,21 @@ public class LineSlider<T> extends Slider {
         setSize((int) d.getWidth(), (int) d.getHeight());
     }
 
+    /**
+     * Specifies slider's size whereby specifies slider's line
+     *
+     * @param width
+     *     Width of the slider.
+     *     Can be positive of negative - it will define the direction fo the slider.
+     *     Negative value means the horizontal direction will be to the left.
+     *     Positive value means the horizontal direction will be to the left.
+     *
+     * @param height
+     *     Height of the slider
+     *     Can be positive of negative - it will define the direction fo the slider.
+     *     Negative value means the vertical direction will be up.
+     *     Positive value means the vertical direction will be down.
+     */
     public void setSize(int width, int height) {
         int startX;
         int startY;
@@ -269,7 +289,13 @@ public class LineSlider<T> extends Slider {
             pointer_ = new Pointer();
         }
     }
-    
+
+    /**
+     * Set thickes of the stroke which will draw the line
+     *
+     * @param thickness
+     *     Thickness of the stroke
+     */
     public void setThickness(int thickness) {
         Point loc = getLocation();
         int x = (int) loc.getX() + thickness_ / 2;
@@ -281,6 +307,7 @@ public class LineSlider<T> extends Slider {
         setPreferredSize(new Dimension(width_, height_));
     }
 
+    @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
@@ -308,27 +335,5 @@ public class LineSlider<T> extends Slider {
         g2d.fill(line_);
 
         pointer_.draw(g2d);
-    }
-
-    public void addChangeListener(ChangeListener l) {
-        listenerList.add(ChangeListener.class, l);
-    }
-    
-    public void removeChangeListener(ChangeListener l) {
-        listenerList.remove(ChangeListener.class, l);
-    }
-
-    protected void fireStateChanged_() 
-    {
-        Object[] listeners = listenerList.getListenerList();
-        for(int i = listeners.length - 2; i >= 0; i -=2 ) {
-            if(listeners[i] == ChangeListener.class) {
-                if(changeEvent == null) {
-                    changeEvent = new ChangeEvent(this);
-                }
-
-                ((ChangeListener) listeners[i + 1]).stateChanged(changeEvent);
-            }          
-        }
     }
 }
